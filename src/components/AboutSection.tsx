@@ -73,7 +73,7 @@ const AboutSection = () => {
           <div className="relative">
             <div className="relative overflow-hidden rounded-2xl shadow-elevated">
               <img
-                src="/logo.png"
+                src="/log.webp"
                 alt="M. Albert Meleka and the professional team at Kirollos Developing Inc."
                 className="w-full h-[400px] object-cover"
               />
