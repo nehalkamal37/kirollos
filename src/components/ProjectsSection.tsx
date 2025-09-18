@@ -4,7 +4,11 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import React, { useRef, useCallback, useMemo, useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
+type GalleryItem = { key: string; src: string; title: string };
+type LightboxSource = "gallery" | "projects";
+
 const ProjectsSection = () => {
+  // ===== Projects (تفضل زي ما هي) =====
   const projects = [
     { id: 1, title: "Modern Kitchen Renovation", category: "Renovation", description: "Complete kitchen transformation with modern appliances and elegant design.", beforeImage: "/k1.jpg", afterImage: "/k2.jpg", testimonial: "Every brick tells a story of excellence." },
     { id: 2, title: "Residential Electrical Upgrade", category: "Electrical", description: "Full electrical system modernization for enhanced safety and efficiency.", beforeImage: "/e1.jpg", afterImage: "/e2.jpg", testimonial: "Powering dreams with precision." },
@@ -24,48 +28,60 @@ const ProjectsSection = () => {
     }
   };
 
-  // صورة الكارد: الأفضل "بعد" لو موجود وإلا "قبل"
   const heroFor = (p: (typeof projects)[number]) => p.afterImage || p.beforeImage;
 
-  type GalleryItem = { key: string; src: string; title: string /*, tag?: "Before" | "After"*/ };
-
-  // ✅ جاليري من صورة واحدة لكل مشروع (شِلنا before/after)
-  const gallery: GalleryItem[] = useMemo(
-    () => projects.map((p) => ({
-      key: String(p.id),
-      src: heroFor(p),
-      title: p.title,
-      // tag: p.afterImage ? "After" : "Before",
-    })),
+  // ===== Project lightbox items (من نفس projects) =====
+  const projectItems: GalleryItem[] = useMemo(
+    () => projects.map((p) => ({ key: `p-${p.id}`, src: heroFor(p), title: p.title })),
     [projects]
   );
 
-  // لفتح اللايتبوكس عند عنصر المشروع الصحيح
-  const indexForProject = (p: (typeof projects)[number]) =>
-    Math.max(0, gallery.findIndex(g => g.key === String(p.id)));
+  // ===== Gallery items (من /public/new فقط) =====
+ 
+  const gallery: GalleryItem[] = useMemo(
+    () => [
+      { key: "g1", src: "/new/2.jpg", title: "Modern Kitchen Renovation" },
+      { key: "g2", src: "/new/6.jpg", title: "Residential Electrical Upgrade" },
+      { key: "g3", src: "/new/3.jpg", title: "Exterior Home Renovation" },
+      { key: "g4", src: "/new/5.jpg", title: "HVAC System Installation" },
+            { key: "g5", src: "/new/4.jpg", title: "Basement Finishing" },
+      { key: "g6", src: "/new/1.jpg", title: "Bathroom Modernization" },
 
-  // Carousel logic
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const scrollByViewport = useCallback((dir: "prev" | "next") => {
-    const el = trackRef.current;
-    if (!el) return;
-    const firstItem = el.querySelector<HTMLDivElement>('[data-slide="true"]');
-    if (!firstItem) return;
-    const gap = 16;
-    const cardWidth = firstItem.offsetWidth + gap;
-    const viewportCount = Math.max(1, Math.floor(el.clientWidth / cardWidth));
-    const delta = cardWidth * viewportCount * (dir === "next" ? 1 : -1);
-    el.scrollBy({ left: delta, behavior: "smooth" });
-  }, []);
+      // زوّد باقي الصور بنفس الشكل
+    ],
+    []
+  );
 
-  // ===== Lightbox / Modal State =====
+
+  // ===== Lightbox State (موحّد للمجموعتين) =====
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [lightboxSource, setLightboxSource] = useState<LightboxSource>("gallery");
 
-  const openAt = (index: number) => { setActiveIndex(index); setIsOpen(true); };
+  const lightboxItems = lightboxSource === "gallery" ? gallery : projectItems;
+
+  const openGalleryAt = (index: number) => {
+    setLightboxSource("gallery");
+    setActiveIndex(index);
+    setIsOpen(true);
+  };
+
+  const openProjectAt = (index: number) => {
+    setLightboxSource("projects");
+    setActiveIndex(index);
+    setIsOpen(true);
+  };
+
   const close = () => setIsOpen(false);
-  const next = useCallback(() => setActiveIndex((i) => (i + 1) % gallery.length), [gallery.length]);
-  const prev = useCallback(() => setActiveIndex((i) => (i - 1 + gallery.length) % gallery.length), [gallery.length]);
+
+  const next = useCallback(
+    () => setActiveIndex((i) => (i + 1) % lightboxItems.length),
+    [lightboxItems.length]
+  );
+  const prev = useCallback(
+    () => setActiveIndex((i) => (i - 1 + lightboxItems.length) % lightboxItems.length),
+    [lightboxItems.length]
+  );
 
   // Keyboard navigation
   useEffect(() => {
@@ -79,9 +95,24 @@ const ProjectsSection = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, next, prev]);
 
+  // ===== Carousel (لـ /new gallery) =====
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const scrollByViewport = useCallback((dir: "prev" | "next") => {
+    const el = trackRef.current;
+    if (!el) return;
+    const firstItem = el.querySelector<HTMLDivElement>('[data-slide="true"]');
+    if (!firstItem) return;
+    const gap = 16;
+    const cardWidth = firstItem.offsetWidth + gap;
+    const viewportCount = Math.max(1, Math.floor(el.clientWidth / cardWidth));
+    const delta = cardWidth * viewportCount * (dir === "next" ? 1 : -1);
+    el.scrollBy({ left: delta, behavior: "smooth" });
+  }, []);
+
   return (
     <section id="projects" className="py-24 bg-gradient-subtle">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* ===== Projects ===== */}
         <div className="text-center mb-16">
           <h2 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-6">
             Our Projects
@@ -92,30 +123,27 @@ const ProjectsSection = () => {
           </p>
         </div>
 
-        {/* Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project) => {
+          {projects.map((project, idx) => {
             const hero = heroFor(project);
-            const startIndex = indexForProject(project);
             return (
               <Card key={project.id} className="group hover:shadow-elegant smooth-transition bg-card border-border">
                 <CardContent className="p-0">
-                  {/* صورة واحدة للكارد */}
+                  {/* خلّي صورة الكارد clickable وتفتح المودال الخاص بالـ projects */}
                   <button
                     type="button"
-                    onClick={() => openAt(startIndex)}
+                    onClick={() => openProjectAt(idx)}
                     aria-label={`${project.title} preview (open)`}
                     className="relative block w-full overflow-hidden rounded-t-lg"
                   >
-                    <div className="relative w-full aspect-video">
+                    <div className="relative w-full aspect-video bg-black/5">
                       <img
                         src={hero}
                         alt={`${project.title} preview`}
-                        className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.03]"
+                        className="absolute inset-0 h-full w-full object-contain select-none"
                         loading="lazy"
                         draggable={false}
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                     </div>
                   </button>
 
@@ -123,15 +151,12 @@ const ProjectsSection = () => {
                     <div className="flex items-center justify-between mb-3">
                       <Badge className={`text-xs ${getCategoryColor(project.category)}`}>{project.category}</Badge>
                     </div>
-
                     <h3 className="font-heading text-xl font-bold text-foreground mb-3">
                       {project.title}
                     </h3>
-
                     <p className="text-muted-foreground mb-4 leading-relaxed">
                       {project.description}
                     </p>
-
                     <blockquote className="border-l-4 border-construction pl-4 italic text-construction font-medium">
                       "{project.testimonial}"
                     </blockquote>
@@ -142,9 +167,7 @@ const ProjectsSection = () => {
           })}
         </div>
 
-        {/* ===========================
-            Arrow Carousel (4 visible)
-            =========================== */}
+        {/* ===== Project Gallery (from /public/new) ===== */}
         <div className="mt-20">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
@@ -169,13 +192,10 @@ const ProjectsSection = () => {
               <ChevronRight className="h-5 w-5" />
             </button>
 
-            {/* Track */}
             <div
               ref={trackRef}
-              className={`
-                flex gap-4 overflow-x-auto scroll-smooth px-2 py-2 rounded-xl bg-card ring-1 ring-border
-                [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden
-              `}
+              className={`flex gap-4 overflow-x-auto scroll-smooth px-2 py-2 rounded-xl bg-card ring-1 ring-border
+                [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden`}
               role="list"
               aria-label="Project gallery"
             >
@@ -184,45 +204,29 @@ const ProjectsSection = () => {
                   key={img.key}
                   role="listitem"
                   data-slide="true"
-                  className={`
-                    group relative flex-none
-                    basis-[80%] sm:basis-[50%] md:basis-[33.333%] lg:basis-[25%] 
-                    rounded-2xl overflow-hidden
-                    shadow-[0_10px_25px_-10px_rgba(0,0,0,0.35)]
-                    ring-1 ring-border
-                    bg-background
-                    perspective-[1200px]
-                    cursor-zoom-in
-                  `}
+                  className="group relative flex-none
+                    basis-[80%] sm:basis-[50%] md:basis-[33.333%] lg:basis-[25%]
+                    rounded-2xl overflow-hidden ring-1 ring-border bg-background cursor-zoom-in"
                 >
                   <button
                     type="button"
-                    onClick={() => openAt(index)}
+                    onClick={() => openGalleryAt(index)}
                     className="block w-full h-full text-left"
                     aria-label={`Open ${img.title}`}
                   >
-                    <div
-                      className={`
-                        relative h-48 w-full
-                        transition-transform duration-500 ease-out transform-gpu
-                        group-hover:[transform:rotateX(6deg)_rotateY(-6deg)_translateY(-4px)]
-                      `}
-                    >
+                    <div className="relative h-48 w-full bg-black/5">
                       <img
                         src={img.src}
                         alt={img.title}
-                        className="h-full w-full object-cover select-none"
+                        className="h-full w-full object-contain select-none"
                         draggable={false}
                         loading="lazy"
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-white/5" />
                     </div>
 
-                    <figcaption className="absolute bottom-0 left-0 right-0 bg-black/45 backdrop-blur-sm text-white px-3 py-2 text-sm flex items-center justify-between">
+                    <figcaption className="absolute bottom-0 left-0 right-0 bg-black/45 backdrop-blur-sm text-white px-3 py-2 text-sm">
                       <span className="font-medium line-clamp-1">{img.title}</span>
-                      {/* <span className="ml-3 inline-flex items-center rounded-md bg-white/15 px-2 py-0.5 text-[11px] uppercase tracking-wide">{img.tag}</span> */}
                     </figcaption>
-                    <div className="pointer-events-none absolute -inset-px rounded-2xl shadow-[0_20px_35px_-15px_rgba(0,0,0,0.45)]" />
                   </button>
                 </figure>
               ))}
@@ -242,11 +246,15 @@ const ProjectsSection = () => {
         </div>
       </div>
 
-      {/* ===== Lightbox Dialog ===== */}
+      {/* ===== Lightbox Dialog (موحّد) ===== */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           className="max-w-5xl p-0 border-0 bg-transparent shadow-none"
-          aria-label={gallery[activeIndex] ? `${gallery[activeIndex].title}` : "Gallery image"}
+          aria-label={
+            lightboxItems[activeIndex]
+              ? `${lightboxItems[activeIndex].title}`
+              : "Gallery image"
+          }
         >
           <div className="relative w-full">
             {/* Close */}
@@ -277,15 +285,17 @@ const ProjectsSection = () => {
             {/* Image */}
             <figure className="relative">
               <img
-                src={gallery[activeIndex]?.src}
-                alt={gallery[activeIndex]?.title || "Gallery image"}
+                src={lightboxItems[activeIndex]?.src}
+                alt={lightboxItems[activeIndex]?.title || "Gallery image"}
                 className="w-full h-[70vh] object-contain rounded-lg bg-black/5"
                 draggable={false}
               />
               <figcaption className="mt-3 text-center text-sm text-muted-foreground">
-                <span className="font-medium">{gallery[activeIndex]?.title}</span>
+                <span className="font-medium">{lightboxItems[activeIndex]?.title}</span>
                 <span className="mx-2">•</span>
-                {activeIndex + 1} / {gallery.length}
+                {activeIndex + 1} / {lightboxItems.length}
+                <span className="mx-2">•</span>
+                {lightboxSource === "projects" ? "Projects" : "Gallery"}
               </figcaption>
             </figure>
           </div>
