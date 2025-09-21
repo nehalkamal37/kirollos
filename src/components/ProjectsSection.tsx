@@ -8,7 +8,7 @@ type GalleryItem = { key: string; src: string; title: string };
 type LightboxSource = "gallery" | "projects";
 
 const ProjectsSection = () => {
-  // ===== Projects (تفضل زي ما هي) =====
+  // ===== Projects =====
   const projects = [
     { id: 1, title: "Modern Kitchen Renovation", category: "Renovation", description: "Complete kitchen transformation with modern appliances and elegant design.", beforeImage: "/k1.jpg", afterImage: "/k2.jpg", testimonial: "Every brick tells a story of excellence." },
     { id: 2, title: "Residential Electrical Upgrade", category: "Electrical", description: "Full electrical system modernization for enhanced safety and efficiency.", beforeImage: "/e1.jpg", afterImage: "/e2.jpg", testimonial: "Powering dreams with precision." },
@@ -21,39 +21,37 @@ const ProjectsSection = () => {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case "Construction": return "bg-construction text-white";
-      case "Electrical": return "bg-construction-light text-construction";
+      case "Electrical": return "bg-construction text-white";
       case "Mechanical": return "bg-secondary text-foreground";
       case "Renovation": return "bg-accent text-accent-foreground";
       default: return "bg-muted text-muted-foreground";
     }
   };
 
-  const heroFor = (p: (typeof projects)[number]) => p.afterImage || p.beforeImage;
-
-  // ===== Project lightbox items (من نفس projects) =====
+  // ===== Project lightbox items (Before & After) =====
   const projectItems: GalleryItem[] = useMemo(
-    () => projects.map((p) => ({ key: `p-${p.id}`, src: heroFor(p), title: p.title })),
+    () =>
+      projects.flatMap((p) => [
+        { key: `p-${p.id}-before`, src: p.beforeImage, title: `${p.title} (Before)` },
+        { key: `p-${p.id}-after`, src: p.afterImage, title: `${p.title} (After)` },
+      ]),
     [projects]
   );
 
-  // ===== Gallery items (من /public/new فقط) =====
- 
+  // ===== Gallery items =====
   const gallery: GalleryItem[] = useMemo(
     () => [
       { key: "g1", src: "/new/2.jpg", title: "Modern Kitchen Renovation" },
       { key: "g2", src: "/new/6.jpg", title: "Residential Electrical Upgrade" },
       { key: "g3", src: "/new/3.jpg", title: "Exterior Home Renovation" },
       { key: "g4", src: "/new/5.jpg", title: "HVAC System Installation" },
-            { key: "g5", src: "/new/4.jpg", title: "Basement Finishing" },
+      { key: "g5", src: "/new/4.jpg", title: "Basement Finishing" },
       { key: "g6", src: "/new/1.jpg", title: "Bathroom Modernization" },
-
-      // زوّد باقي الصور بنفس الشكل
     ],
     []
   );
 
-
-  // ===== Lightbox State (موحّد للمجموعتين) =====
+  // ===== Lightbox State =====
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [lightboxSource, setLightboxSource] = useState<LightboxSource>("gallery");
@@ -68,7 +66,7 @@ const ProjectsSection = () => {
 
   const openProjectAt = (index: number) => {
     setLightboxSource("projects");
-    setActiveIndex(index);
+    setActiveIndex(index * 2); // go to "before"
     setIsOpen(true);
   };
 
@@ -95,7 +93,7 @@ const ProjectsSection = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, next, prev]);
 
-  // ===== Carousel (لـ /new gallery) =====
+  // ===== Carousel for gallery =====
   const trackRef = useRef<HTMLDivElement | null>(null);
   const scrollByViewport = useCallback((dir: "prev" | "next") => {
     const el = trackRef.current;
@@ -124,50 +122,64 @@ const ProjectsSection = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((project, idx) => {
-            const hero = heroFor(project);
-            return (
-              <Card key={project.id} className="group hover:shadow-elegant smooth-transition bg-card border-border">
-                <CardContent className="p-0">
-                  {/* خلّي صورة الكارد clickable وتفتح المودال الخاص بالـ projects */}
-                  <button
-                    type="button"
-                    onClick={() => openProjectAt(idx)}
-                    aria-label={`${project.title} preview (open)`}
-                    className="relative block w-full overflow-hidden rounded-t-lg"
-                  >
-                    <div className="relative w-full aspect-video bg-black/5">
-                      <img
-                        src={hero}
-                        alt={`${project.title} preview`}
-                        className="absolute inset-0 h-full w-full object-contain select-none"
-                        loading="lazy"
-                        draggable={false}
-                      />
-                    </div>
-                  </button>
+          {projects.map((project, idx) => (
+            <Card key={project.id} className="group hover:shadow-elegant smooth-transition bg-card border-border">
+              <CardContent className="p-0">
+                {/* Clickable Before/After Block */}
+                <button
+                  type="button"
+                  onClick={() => openProjectAt(idx)}
+                  aria-label={`${project.title} preview (open)`}
+                  className="relative block w-full overflow-hidden rounded-t-lg"
+                >
+                  <div className="relative grid grid-cols-2 gap-1 w-full h-60 bg-black/5">
+  <img
+    src={project.beforeImage}
+    alt={`${project.title} before`}
+    className="h-full w-full object-cover select-none"
+    loading="lazy"
+    draggable={false}
+  />
+  <img
+    src={project.afterImage}
+    alt={`${project.title} after`}
+    className="h-full w-full object-cover select-none"
+    loading="lazy"
+    draggable={false}
+  />
 
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <Badge className={`text-xs ${getCategoryColor(project.category)}`}>{project.category}</Badge>
-                    </div>
-                    <h3 className="font-heading text-xl font-bold text-foreground mb-3">
-                      {project.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4 leading-relaxed">
-                      {project.description}
-                    </p>
-                    <blockquote className="border-l-4 border-construction pl-4 italic text-construction font-medium">
-                      "{project.testimonial}"
-                    </blockquote>
+  <span className="absolute left-2 top-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
+    Before
+  </span>
+  <span className="absolute right-2 top-2 bg-green-700 text-white px-2 py-1 text-xs rounded">
+    After
+  </span>
+</div>
+
+
+
+                </button>
+
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <Badge className={`text-xs ${getCategoryColor(project.category)}`}>{project.category}</Badge>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  <h3 className="font-heading text-xl font-bold text-foreground mb-3">
+                    {project.title}
+                  </h3>
+                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                    {project.description}
+                  </p>
+                  <blockquote className="border-l-4 border-construction pl-4 italic text-construction font-medium">
+                    "{project.testimonial}"
+                  </blockquote>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* ===== Project Gallery (from /public/new) ===== */}
+        {/* ===== Project Gallery (bottom) ===== */}
         <div className="mt-20">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
@@ -246,15 +258,11 @@ const ProjectsSection = () => {
         </div>
       </div>
 
-      {/* ===== Lightbox Dialog (موحّد) ===== */}
+      {/* ===== Lightbox Dialog ===== */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           className="max-w-5xl p-0 border-0 bg-transparent shadow-none"
-          aria-label={
-            lightboxItems[activeIndex]
-              ? `${lightboxItems[activeIndex].title}`
-              : "Gallery image"
-          }
+          aria-label={lightboxItems[activeIndex]?.title || "Gallery image"}
         >
           <div className="relative w-full">
             {/* Close */}
