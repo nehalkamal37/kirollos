@@ -5,38 +5,86 @@ import React, { useRef, useCallback, useMemo, useState, useEffect } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type GalleryItem = { key: string; src: string; title: string };
-type LightboxSource = "gallery" | "projects";
 
 const ProjectsSection = () => {
   // ===== Projects =====
   const projects = [
-    { id: 1, title: "Modern Kitchen Renovation", category: "Renovation", description: "Complete kitchen transformation with modern appliances and elegant design.", beforeImage: "/k1.jpg", afterImage: "/k2.jpg", testimonial: "Every brick tells a story of excellence." },
-    { id: 2, title: "Residential Electrical Upgrade", category: "Electrical", description: "Full electrical system modernization for enhanced safety and efficiency.", beforeImage: "/e1.jpg", afterImage: "/e2.jpg", testimonial: "Powering dreams with precision." },
-    { id: 3, title: "Exterior Home Renovation", category: "Construction", description: "Stunning exterior makeover enhancing curb appeal and structural integrity.", beforeImage: "/h1.jpg", afterImage: "/h2.jpg", testimonial: "Strength that lasts generations." },
-    { id: 4, title: "HVAC System Installation", category: "Mechanical", description: "Complete heating and cooling system installation for year-round comfort.", beforeImage: "/b1.jpg", afterImage: "/b2.jpg", testimonial: "Comfort, safety, and efficiency delivered." },
-    { id: 5, title: "Basement Finishing", category: "Construction", description: "Transform unused space into a beautiful, functional living area.", beforeImage: "/m1.jpg", afterImage: "/m2.jpg", testimonial: "From concept to completion, dreams realized." },
-    { id: 6, title: "Bathroom Modernization", category: "Renovation", description: "Luxury bathroom renovation with premium fixtures and elegant finishes.", beforeImage: "/s1.jpg", afterImage: "/s2.jpg", testimonial: "Every detail crafted with passion." }
+    {
+      id: 1,
+      title: "Modern Kitchen Renovation",
+      category: "Renovation",
+      description:
+        "Complete kitchen transformation with modern appliances and elegant design.",
+      beforeImage: "/k1.jpg",
+      afterImage: "/k2.jpg",
+      testimonial: "Every brick tells a story of excellence.",
+    },
+    {
+      id: 2,
+      title: "Residential Electrical Upgrade",
+      category: "Electrical",
+      description:
+        "Full electrical system modernization for enhanced safety and efficiency.",
+      beforeImage: "/e1.jpg",
+      afterImage: "/e2.jpg",
+      testimonial: "Powering dreams with precision.",
+    },
+    {
+      id: 3,
+      title: "Exterior Home Renovation",
+      category: "Construction",
+      description:
+        "Stunning exterior makeover enhancing curb appeal and structural integrity.",
+      beforeImage: "/h1.jpg",
+      afterImage: "/h2.jpg",
+      testimonial: "Strength that lasts generations.",
+    },
+    {
+      id: 4,
+      title: "HVAC System Installation",
+      category: "Mechanical",
+      description:
+        "Complete heating and cooling system installation for year-round comfort.",
+      beforeImage: "/b1.jpg",
+      afterImage: "/b2.jpg",
+      testimonial: "Comfort, safety, and efficiency delivered.",
+    },
+    {
+      id: 5,
+      title: "Basement Finishing",
+      category: "Construction",
+      description:
+        "Transform unused space into a beautiful, functional living area.",
+      beforeImage: "/m1.jpg",
+      afterImage: "/m2.jpg",
+      testimonial: "From concept to completion, dreams realized.",
+    },
+    {
+      id: 6,
+      title: "Bathroom Modernization",
+      category: "Renovation",
+      description:
+        "Luxury bathroom renovation with premium fixtures and elegant finishes.",
+      beforeImage: "/s1.jpg",
+      afterImage: "/s2.jpg",
+      testimonial: "Every detail crafted with passion.",
+    },
   ];
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case "Construction": return "bg-construction text-white";
-      case "Electrical": return "bg-construction text-white";
-      case "Mechanical": return "bg-secondary text-foreground";
-      case "Renovation": return "bg-accent text-accent-foreground";
-      default: return "bg-muted text-muted-foreground";
+      case "Construction":
+        return "bg-construction text-white";
+      case "Electrical":
+        return "bg-construction text-white";
+      case "Mechanical":
+        return "bg-secondary text-foreground";
+      case "Renovation":
+        return "bg-accent text-accent-foreground";
+      default:
+        return "bg-muted text-muted-foreground";
     }
   };
-
-  // ===== Project lightbox items (Before & After) =====
-  const projectItems: GalleryItem[] = useMemo(
-    () =>
-      projects.flatMap((p) => [
-        { key: `p-${p.id}-before`, src: p.beforeImage, title: `${p.title} (Before)` },
-        { key: `p-${p.id}-after`, src: p.afterImage, title: `${p.title} (After)` },
-      ]),
-    [projects]
-  );
 
   // ===== Gallery items =====
   const gallery: GalleryItem[] = useMemo(
@@ -51,22 +99,38 @@ const ProjectsSection = () => {
     []
   );
 
-  // ===== Lightbox State =====
+  // ===== Lightbox State (dynamic items per source) =====
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [lightboxSource, setLightboxSource] = useState<LightboxSource>("gallery");
-
-  const lightboxItems = lightboxSource === "gallery" ? gallery : projectItems;
+  const [lightboxItems, setLightboxItems] = useState<GalleryItem[]>([]);
+  const [lightboxLabel, setLightboxLabel] = useState<"gallery" | "project">(
+    "gallery"
+  );
 
   const openGalleryAt = (index: number) => {
-    setLightboxSource("gallery");
+    setLightboxItems(gallery);
+    setLightboxLabel("gallery");
     setActiveIndex(index);
     setIsOpen(true);
   };
 
-  const openProjectAt = (index: number) => {
-    setLightboxSource("projects");
-    setActiveIndex(index * 2); // go to "before"
+  const openProjectAt = (projectIndex: number) => {
+    const p = projects[projectIndex];
+    const pair: GalleryItem[] = [
+      {
+        key: `p-${p.id}-before`,
+        src: p.beforeImage,
+        title: `${p.title} (Before)`,
+      },
+      {
+        key: `p-${p.id}-after`,
+        src: p.afterImage,
+        title: `${p.title} (After)`,
+      },
+    ];
+    setLightboxItems(pair);
+    setLightboxLabel("project");
+    setActiveIndex(0); // Start on "Before"
     setIsOpen(true);
   };
 
@@ -86,8 +150,8 @@ const ProjectsSection = () => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft")  prev();
-      if (e.key === "Escape")     close();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -116,14 +180,17 @@ const ProjectsSection = () => {
             Our Projects
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Every project tells a story of transformation, excellence, and dreams brought to life. 
+            Every project tells a story of transformation, excellence, and dreams brought to life.
             Discover how we've helped homeowners across Markham create spaces they love.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {projects.map((project, idx) => (
-            <Card key={project.id} className="group hover:shadow-elegant smooth-transition bg-card border-border">
+            <Card
+              key={project.id}
+              className="group hover:shadow-elegant smooth-transition bg-card border-border"
+            >
               <CardContent className="p-0">
                 {/* Clickable Before/After Block */}
                 <button
@@ -133,36 +200,35 @@ const ProjectsSection = () => {
                   className="relative block w-full overflow-hidden rounded-t-lg"
                 >
                   <div className="relative grid grid-cols-2 gap-1 w-full h-60 bg-black/5">
-  <img
-    src={project.beforeImage}
-    alt={`${project.title} before`}
-    className="h-full w-full object-cover select-none"
-    loading="lazy"
-    draggable={false}
-  />
-  <img
-    src={project.afterImage}
-    alt={`${project.title} after`}
-    className="h-full w-full object-cover select-none"
-    loading="lazy"
-    draggable={false}
-  />
+                    <img
+                      src={project.beforeImage}
+                      alt={`${project.title} before`}
+                      className="h-full w-full object-cover select-none"
+                      loading="lazy"
+                      draggable={false}
+                    />
+                    <img
+                      src={project.afterImage}
+                      alt={`${project.title} after`}
+                      className="h-full w-full object-cover select-none"
+                      loading="lazy"
+                      draggable={false}
+                    />
 
-  <span className="absolute left-2 top-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
-    Before
-  </span>
-  <span className="absolute right-2 top-2 bg-green-700 text-white px-2 py-1 text-xs rounded">
-    After
-  </span>
-</div>
-
-
-
+                    <span className="absolute left-2 top-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
+                      Before
+                    </span>
+                    <span className="absolute right-2 top-2 bg-green-700 text-white px-2 py-1 text-xs rounded">
+                      After
+                    </span>
+                  </div>
                 </button>
 
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <Badge className={`text-xs ${getCategoryColor(project.category)}`}>{project.category}</Badge>
+                    <Badge className={`text-xs ${getCategoryColor(project.category)}`}>
+                      {project.category}
+                    </Badge>
                   </div>
                   <h3 className="font-heading text-xl font-bold text-foreground mb-3">
                     {project.title}
@@ -248,7 +314,9 @@ const ProjectsSection = () => {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <p className="text-2xl font-heading text-foreground mb-8">Ready to start your transformation story?</p>
+          <p className="text-2xl font-heading text-foreground mb-8">
+            Ready to start your transformation story?
+          </p>
           <a
             href="#contact"
             className="inline-flex items-center px-8 py-4 bg-construction hover:bg-construction-dark text-white font-semibold rounded-md smooth-transition shadow-construction hover:shadow-xl transform hover:-translate-y-1"
@@ -262,7 +330,7 @@ const ProjectsSection = () => {
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent
           className="max-w-5xl p-0 border-0 bg-transparent shadow-none"
-          aria-label={lightboxItems[activeIndex]?.title || "Gallery image"}
+          aria-label={lightboxItems[activeIndex]?.title ?? "Gallery image"}
         >
           <div className="relative w-full">
             {/* Close */}
@@ -279,6 +347,7 @@ const ProjectsSection = () => {
               onClick={prev}
               aria-label="Previous image"
               className="absolute left-2 top-1/2 -translate-y-1/2 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-md ring-1 ring-border hover:bg-background shadow-md transition"
+              disabled={lightboxItems.length === 0}
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -286,24 +355,33 @@ const ProjectsSection = () => {
               onClick={next}
               aria-label="Next image"
               className="absolute right-2 top-1/2 -translate-y-1/2 z-20 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur-md ring-1 ring-border hover:bg-background shadow-md transition"
+              disabled={lightboxItems.length === 0}
             >
               <ChevronRight className="h-5 w-5" />
             </button>
 
             {/* Image */}
             <figure className="relative">
-              <img
-                src={lightboxItems[activeIndex]?.src}
-                alt={lightboxItems[activeIndex]?.title || "Gallery image"}
-                className="w-full h-[70vh] object-contain rounded-lg bg-black/5"
-                draggable={false}
-              />
+              {lightboxItems[activeIndex]?.src && (
+                <img
+                  src={lightboxItems[activeIndex].src}
+                  alt={lightboxItems[activeIndex].title}
+                  className="w-full h-[70vh] object-contain rounded-lg bg-black/5"
+                  draggable={false}
+                />
+              )}
               <figcaption className="mt-3 text-center text-sm text-muted-foreground">
-                <span className="font-medium">{lightboxItems[activeIndex]?.title}</span>
-                <span className="mx-2">•</span>
-                {activeIndex + 1} / {lightboxItems.length}
-                <span className="mx-2">•</span>
-                {lightboxSource === "projects" ? "Projects" : "Gallery"}
+                <span className="font-medium">
+                  {lightboxItems[activeIndex]?.title ?? ""}
+                </span>
+                {lightboxItems.length > 0 && (
+                  <>
+                    <span className="mx-2">•</span>
+                    {activeIndex + 1} / {lightboxItems.length}
+                    <span className="mx-2">•</span>
+                    {lightboxLabel === "project" ? "Project" : "Gallery"}
+                  </>
+                )}
               </figcaption>
             </figure>
           </div>
