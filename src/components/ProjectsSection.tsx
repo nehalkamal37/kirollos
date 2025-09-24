@@ -15,7 +15,7 @@ const ProjectsSection = () => {
       category: "Renovation",
       description:
         "Complete kitchen transformation with modern appliances and elegant design.",
-      beforeImage: "/k1.jpg",
+      beforeImage: "before/kit1.jpg",
       afterImage: "/k2.jpg",
       testimonial: "Every brick tells a story of excellence.",
     },
@@ -25,8 +25,8 @@ const ProjectsSection = () => {
       category: "Electrical",
       description:
         "Full electrical system modernization for enhanced safety and efficiency.",
-      beforeImage: "/e1.jpg",
-      afterImage: "/e2.jpg",
+      beforeImage: "before/elec1.jpg",
+      afterImage: "before/elec2.jpg",
       testimonial: "Powering dreams with precision.",
     },
     {
@@ -41,23 +41,23 @@ const ProjectsSection = () => {
     },
     {
       id: 4,
-      title: "HVAC System Installation",
-      category: "Mechanical",
+      title: "Backyard Deck Refinishing",
+      category: "Outdoor Renovation",
       description:
-        "Complete heating and cooling system installation for year-round comfort.",
-      beforeImage: "/b1.jpg",
-      afterImage: "/b2.jpg",
-      testimonial: "Comfort, safety, and efficiency delivered.",
+        "Rejuvenated wood deck with premium stain and seal for long-lasting color and protection.",
+      beforeImage: "before/1.jpg",
+      afterImage: "before/2.jpg",
+      testimonial: "Revive, protect, enjoy.",
     },
     {
       id: 5,
-      title: "Basement Finishing",
-      category: "Construction",
+      title: "Garden Walkway Refresh",
+      category: "Landscaping",
       description:
-        "Transform unused space into a beautiful, functional living area.",
-      beforeImage: "/m1.jpg",
-      afterImage: "/m2.jpg",
-      testimonial: "From concept to completion, dreams realized.",
+        "Re-set uneven pavers, added edge restraint, and re-sanded joints for a smooth, safe path.",
+      beforeImage: "before/bas1.jpg",
+      afterImage: "before/bas2.jpg",
+      testimonial: "Smooth walk, tidy borders.",
     },
     {
       id: 6,
