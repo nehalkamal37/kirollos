@@ -61,13 +61,13 @@ const ProjectsSection = () => {
     },
     {
       id: 6,
-      title: "Bathroom Modernization",
+      title: "Deck & Outdoor Upgrade",
       category: "Renovation",
       description:
-        "Luxury bathroom renovation with premium fixtures and elegant finishes.",
-      beforeImage: "/s1.jpg",
-      afterImage: "/s2.jpg",
-      testimonial: "Every detail crafted with passion.",
+        "Elegant wooden deck renovation with fresh paint, durable railing, and modern lattice design.",
+      beforeImage: "before/last1.jpg",
+      afterImage: "before/last2.jpg",
+      testimonial: "Bringing new life to your outdoor living space.",
     },
   ];
 
