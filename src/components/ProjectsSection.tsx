@@ -11,34 +11,37 @@ const ProjectsSection = () => {
   const projects = [
     {
       id: 1,
-      title: "Modern Kitchen Renovation",
+      title: "Elegant Staircase Transformation",
       category: "Renovation",
       description:
-        "Complete kitchen transformation with modern appliances and elegant design.",
-      beforeImage: "before/kit1.jpg",
-      afterImage: "/k2.jpg",
-      testimonial: "Every brick tells a story of excellence.",
+        "A complete redesign blending natural wood tones with sleek black iron balusters — where timeless craftsmanship meets modern charm.",
+      beforeImage: "3/a11.jpg",
+      afterImage: "3/a2.jpg",
+      testimonial: "Every step reflects a touch of excellence.",
     },
     {
-      id: 2,
-      title: "Residential Electrical Upgrade",
-      category: "Electrical",
-      description:
-        "Full electrical system modernization for enhanced safety and efficiency.",
-      beforeImage: "before/elec1.jpg",
-      afterImage: "before/elec2.jpg",
-      testimonial: "Powering dreams with precision.",
-    },
+  id: 2,
+  title: "Luxury Bathroom Renovation",
+  category: "Renovation",
+  description:
+    "Modern bathroom upgrade featuring a sleek rainfall shower panel, ambient LED lighting, and a clean tile finish for a spa-like experience.",
+  beforeImage: "3/b1.jpg",
+  afterImage: "3/b2.jpg",
+  testimonial: "Where everyday comfort meets modern luxury.",
+},
+
+
     {
-      id: 3,
-      title: "Exterior Home Renovation",
-      category: "Construction",
-      description:
-        "Stunning exterior makeover enhancing curb appeal and structural integrity.",
-      beforeImage: "/h1.jpg",
-      afterImage: "/h2.jpg",
-      testimonial: "Strength that lasts generations.",
-    },
+  id: 3,
+  title: "Front Entrance Renovation",
+  category: "Construction",
+  description:
+    "Beautifully rebuilt front steps with durable stone tiles, combining safety, strength, and modern design for a welcoming entrance.",
+  beforeImage: "3/c1.jpg",
+  afterImage: "3/c2.jpg",
+  testimonial: "Every step built to impress and endure.",
+},
+
     {
       id: 4,
       title: "Backyard Deck Refinishing",
