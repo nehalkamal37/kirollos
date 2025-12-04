@@ -23,11 +23,13 @@ const Navigation = () => {
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <span className="font-heading text-2xl font-bold text-construction">
-              Kirollos Developing Inc.
-            </span>
-          </div>
+      <div className="flex-shrink-0 flex items-center h-full">
+  <img
+    src="/logo_transparent.png"
+    alt="Logo"
+    className="h-full w-auto object-contain mt-6"
+  />
+</div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
